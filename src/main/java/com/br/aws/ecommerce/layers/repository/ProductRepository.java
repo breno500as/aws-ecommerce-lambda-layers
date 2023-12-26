@@ -16,28 +16,22 @@ import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
 import com.br.aws.ecommerce.layers.model.ProductDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ProductRepository {
+public class ProductRepository extends BaseLambdaFunction {
 
 	private Logger logger = Logger.getLogger(ProductRepository.class.getName());
 
 	private DynamoDB dynamoDB;
 
-	private String tableProducts;
+	private String tableProducts = "product";
+	
+	 
 
-	private ObjectMapper mapper;
-
-	public ProductRepository(AmazonDynamoDB amazonDynamoDB, String tableProducts) {
+	public ProductRepository(AmazonDynamoDB amazonDynamoDB) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
-		this.tableProducts = tableProducts;
-
-		final ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		this.mapper = mapper;
 	}
 	
 	
@@ -62,7 +56,7 @@ public class ProductRepository {
 	          
 	          UpdateItemOutcome updateItemOutcome =  table.updateItem(updateItemSpec);  
 	         
-	          return this.mapper.readValue(updateItemOutcome.getItem().toJSONPretty(), ProductDTO.class);     
+	          return super.getMapper().readValue(updateItemOutcome.getItem().toJSONPretty(), ProductDTO.class);     
 	      } catch (Exception e) { 
 	    	 this.logger.log(Level.SEVERE, "Cannot update product: %s" , e.getMessage());
 	    	 throw new RuntimeException(e); 
@@ -85,8 +79,7 @@ public class ProductRepository {
 		
 		  final PutItemOutcome putItemOutcome  = table.putItem(item);  
 		        
-		
-		  return this.mapper.readValue(putItemOutcome.getItem().toJSONPretty(), ProductDTO.class);
+		  return super.getMapper().readValue(putItemOutcome.getItem().toJSONPretty(), ProductDTO.class);
 		
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, "Cannot save product: %s" , e.getMessage());
@@ -122,7 +115,7 @@ public class ProductRepository {
 				itensStr += item.toJSONPretty() + ",";
 			}
 
-			return this.mapper.readValue(itensStr, new TypeReference<List<ProductDTO>>() {});
+			return super.getMapper().readValue(itensStr, new TypeReference<List<ProductDTO>>() {});
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, "Cannot find all products: %s" , e.getMessage());
@@ -139,7 +132,7 @@ public class ProductRepository {
 
 			final Item item = table.getItem("id", id);
 
-			return this.mapper.readValue(item.toJSONPretty(), ProductDTO.class);
+			return super.getMapper().readValue(item.toJSONPretty(), ProductDTO.class);
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, "Cannot find product by id: %s" , e.getMessage());
 			throw new RuntimeException(e);
