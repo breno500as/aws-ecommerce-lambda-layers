@@ -32,41 +32,32 @@ public class ProductRepository extends BaseLambdaFunction {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
 	}
 
-	 
 	public ProductDTO update(ProductDTO product, String uuid) {
 
 		try {
 
 			final Table table = this.dynamoDB.getTable(this.tableProducts);
 
-			final UpdateItemSpec updateItemSpec = new UpdateItemSpec()
-					.withPrimaryKey("id", uuid)
+			final UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("id", uuid)
 					.withUpdateExpression("set #name = :val1, #code = :val2, #price = :val3, #model = :val4")
 					.withConditionExpression("attribute_exists(id)")
-					.withNameMap(
-							new NameMap().with("#name", "name")
-				                          .with("#code", "code")
-						                  .with("#price", "price")
-						                  .with("#model", "model"))
+					.withNameMap(new NameMap().with("#name", "name").with("#code", "code").with("#price", "price")
+							.with("#model", "model"))
 					.withValueMap(
-							new ValueMap().withString(":val1", product.getName())
-							              .withString(":val2", product.getCode())
-									      .withString(":val3", product.getPrice())
-									      .withString(":val4", product.getModel()))
+							new ValueMap().withString(":val1", product.getName()).withString(":val2", product.getCode())
+									.withString(":val3", product.getPrice()).withString(":val4", product.getModel()))
 					.withReturnValues(ReturnValue.ALL_NEW);
 
 			UpdateItemOutcome updateItemOutcome = table.updateItem(updateItemSpec);
 
 			return super.getMapper().readValue(updateItemOutcome.getItem().toJSON(), ProductDTO.class);
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot update product: %s", e.getMessage()),e);
+			this.logger.log(Level.SEVERE, String.format("Cannot update product: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 
 	}
 
-
-	 
 	public ProductDTO save(ProductDTO product) {
 
 		try {
@@ -91,7 +82,6 @@ public class ProductRepository extends BaseLambdaFunction {
 		}
 	}
 
-	 
 	public void delete(String uuid) {
 
 		try {
@@ -100,13 +90,12 @@ public class ProductRepository extends BaseLambdaFunction {
 			table.deleteItem("id", uuid);
 
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot delete product: %s", e.getMessage()),e);
+			this.logger.log(Level.SEVERE, String.format("Cannot delete product: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 
 	}
 
-	 
 	public List<ProductDTO> findAll() {
 
 		try {
@@ -116,18 +105,17 @@ public class ProductRepository extends BaseLambdaFunction {
 			final ItemCollection<ScanOutcome> itemCollection = table.scan();
 
 			final StringBuilder sb = new StringBuilder();
-			
+
 			sb.append("[");
 
 			for (Item item : itemCollection) {
 				sb.append(item.toJSON()).append(",");
 			}
-			
+
 			sb.append("]");
-			
-			 
-		   return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductDTO>>() {});
-			 
+
+			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductDTO>>() {
+			});
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot find all products: %s", e.getMessage()), e);
@@ -136,7 +124,6 @@ public class ProductRepository extends BaseLambdaFunction {
 
 	}
 
-	 
 	public ProductDTO findById(String id) {
 
 		try {
@@ -144,17 +131,16 @@ public class ProductRepository extends BaseLambdaFunction {
 			final Table table = this.dynamoDB.getTable(this.tableProducts);
 
 			final Item item = table.getItem("id", id);
-			
+
 			if (item == null) {
 				throw new RuntimeException("Product not found!");
 			}
 
 			return super.getMapper().readValue(item.toJSON(), ProductDTO.class);
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot product by id: %s", e.getMessage()),e);
+			this.logger.log(Level.SEVERE, String.format("Cannot product by id: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}
-	
-	
+
 }
