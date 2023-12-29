@@ -17,7 +17,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
-import com.br.aws.ecommerce.layers.model.ProductDTO;
+import com.br.aws.ecommerce.layers.entity.ProductEntity;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ProductRepository extends BaseLambdaFunction {
@@ -34,25 +34,28 @@ public class ProductRepository extends BaseLambdaFunction {
 
 	
  
-	public ProductDTO update(ProductDTO product, String uuid) {
+	public ProductEntity update(ProductEntity product, String uuid) {
 
 		try {
 
 			final Table table = this.dynamoDB.getTable(this.tableProducts);
 
 			final UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("id", uuid)
-					.withUpdateExpression("set #name = :val1, #code = :val2, #price = :val3, #model = :val4")
+					.withUpdateExpression("set #name = :val1, #code = :val2, #price = :val3, #model = :val4, #email = :val5")
 					.withConditionExpression("attribute_exists(id)")
 					.withNameMap(new NameMap().with("#name", "name").with("#code", "code").with("#price", "price")
-							.with("#model", "model"))
+							.with("#model", "model").with("#email", "email"))
 					.withValueMap(
-							new ValueMap().withString(":val1", product.getName()).withString(":val2", product.getCode())
-									.withString(":val3", product.getPrice()).withString(":val4", product.getModel()))
+							new ValueMap().withString(":val1", product.getName())
+							              .withString(":val2", product.getCode())
+									      .withNumber(":val3", product.getPrice())
+									      .withString(":val4", product.getModel())
+									      .withString(":val5", product.getEmail()))
 					.withReturnValues(ReturnValue.ALL_NEW);
 
 			UpdateItemOutcome updateItemOutcome = table.updateItem(updateItemSpec);
 
-			return super.getMapper().readValue(updateItemOutcome.getItem().toJSON(), ProductDTO.class);
+			return super.getMapper().readValue(updateItemOutcome.getItem().toJSON(), ProductEntity.class);
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot update product: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
@@ -61,7 +64,7 @@ public class ProductRepository extends BaseLambdaFunction {
 	}
 
  
-	public ProductDTO save(ProductDTO product) {
+	public ProductEntity save(ProductEntity product) {
 
 		try {
 
@@ -70,8 +73,9 @@ public class ProductRepository extends BaseLambdaFunction {
 			final String id = UUID.randomUUID().toString();
 
 			final Item item = new Item().withPrimaryKey("id", id).withString("name", product.getName())
-					.withString("code", product.getCode()).withString("price", product.getPrice())
-					.withString("model", product.getModel());
+					.withString("code", product.getCode()).withNumber("price", product.getPrice())
+					.withString("model", product.getModel())
+					.withString("email", product.getEmail());
 
 			table.putItem(item);
 
@@ -101,7 +105,7 @@ public class ProductRepository extends BaseLambdaFunction {
 	}
 
 	 
-	public List<ProductDTO> findAll() {
+	public List<ProductEntity> findAll() {
 
 		try {
 
@@ -119,7 +123,7 @@ public class ProductRepository extends BaseLambdaFunction {
 
 			sb.append("]");
 
-			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductDTO>>() {
+			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductEntity>>() {
 			});
 
 		} catch (Exception e) {
@@ -130,7 +134,7 @@ public class ProductRepository extends BaseLambdaFunction {
 	}
 
  
-	public ProductDTO findById(String id) {
+	public ProductEntity findById(String id) {
 
 		try {
 
@@ -142,7 +146,7 @@ public class ProductRepository extends BaseLambdaFunction {
 				throw new RuntimeException("Product not found!");
 			}
 
-			return super.getMapper().readValue(item.toJSON(), ProductDTO.class);
+			return super.getMapper().readValue(item.toJSON(), ProductEntity.class);
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot product by id: %s", e.getMessage()), e);
 			throw new RuntimeException(e);

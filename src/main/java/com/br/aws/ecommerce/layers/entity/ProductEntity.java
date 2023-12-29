@@ -1,6 +1,8 @@
-package com.br.aws.ecommerce.layers.model;
+package com.br.aws.ecommerce.layers.entity;
 
-public class ProductDTO {
+import java.math.BigDecimal;
+
+public class ProductEntity {
 
 	private String id;
 
@@ -8,9 +10,19 @@ public class ProductDTO {
 
 	private String code;
 
-	private String price;
+	private BigDecimal price;
 
 	private String model;
+
+	private String email;
+
+	public ProductEntity() {
+
+	}
+
+	public ProductEntity(String id) {
+		this.id = id;
+	}
 
 	public String getId() {
 		return id;
@@ -36,11 +48,11 @@ public class ProductDTO {
 		this.code = code;
 	}
 
-	public String getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(String price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -50,6 +62,14 @@ public class ProductDTO {
 
 	public void setModel(String model) {
 		this.model = model;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }
