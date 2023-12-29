@@ -14,8 +14,6 @@ public class ProductEntity {
 
 	private String model;
 
-	private String email;
-
 	public ProductEntity() {
 
 	}
@@ -62,14 +60,6 @@ public class ProductEntity {
 
 	public void setModel(String model) {
 		this.model = model;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 }

@@ -41,16 +41,15 @@ public class ProductRepository extends BaseLambdaFunction {
 			final Table table = this.dynamoDB.getTable(this.tableProducts);
 
 			final UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("id", uuid)
-					.withUpdateExpression("set #name = :val1, #code = :val2, #price = :val3, #model = :val4, #email = :val5")
+					.withUpdateExpression("set #name = :val1, #code = :val2, #price = :val3, #model = :val4")
 					.withConditionExpression("attribute_exists(id)")
 					.withNameMap(new NameMap().with("#name", "name").with("#code", "code").with("#price", "price")
-							.with("#model", "model").with("#email", "email"))
+							.with("#model", "model"))
 					.withValueMap(
 							new ValueMap().withString(":val1", product.getName())
 							              .withString(":val2", product.getCode())
 									      .withNumber(":val3", product.getPrice())
-									      .withString(":val4", product.getModel())
-									      .withString(":val5", product.getEmail()))
+									      .withString(":val4", product.getModel()))
 					.withReturnValues(ReturnValue.ALL_NEW);
 
 			UpdateItemOutcome updateItemOutcome = table.updateItem(updateItemSpec);
@@ -74,8 +73,8 @@ public class ProductRepository extends BaseLambdaFunction {
 
 			final Item item = new Item().withPrimaryKey("id", id).withString("name", product.getName())
 					.withString("code", product.getCode()).withNumber("price", product.getPrice())
-					.withString("model", product.getModel())
-					.withString("email", product.getEmail());
+					.withString("model", product.getModel());
+				 
 
 			table.putItem(item);
 
