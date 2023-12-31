@@ -40,7 +40,7 @@ public class EventRepository extends BaseLambdaFunction {
 					.withLong("createdAt", timestamp)
 					.withString("requestId", productEvent.getRequestId())
 					.withString("eventType", productEvent.getProductEventType().getValue())
-					.withString("info", getMapper().writeValueAsString(new ProductEventDTO(productEvent.getProductId(), productEvent.getProductPrice())))
+					.withJSON("info", getMapper().writeValueAsString(new ProductEventDTO(productEvent.getProductId(), productEvent.getProductPrice())))
 					.withLong("ttl", ttl);
 			
 			if (productEvent.getEmail() != null) {
