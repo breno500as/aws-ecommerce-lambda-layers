@@ -1,11 +1,9 @@
 package com.br.aws.ecommerce.layers.repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
@@ -156,34 +154,39 @@ public class ProductRepository extends BaseLambdaFunction {
 		}
 	}
 	
+	
+	 
+ 
 	public List<ProductEntity> getByIds(List<String> ids) {
 
 		try {
-
-			final BatchGetItemSpec spec = new BatchGetItemSpec()  .withTableKeyAndAttributes(new TableKeysAndAttributes(this.tableProducts)
-	                .withHashOnlyKeys("id", ids)
-	                .withConsistentRead(true));
 			
-			final Map<String, List<Item>> mapItens = this.dynamoDB.batchGetItem(spec).getTableItems();
 			
-
+			final TableKeysAndAttributes tableKeysAndAttributes = new TableKeysAndAttributes(this.tableProducts);
+			
+			tableKeysAndAttributes.addHashOnlyPrimaryKeys("id", ids.toArray(new String[ids.size()]));
+			
+			final BatchGetItemSpec spec = new BatchGetItemSpec() .withTableKeyAndAttributes(tableKeysAndAttributes);
+			
+			final List<Item> itens = this.dynamoDB.batchGetItem(spec).getTableItems().get(this.tableProducts);
+			
 			final StringBuilder sb = new StringBuilder();
 
 			sb.append("["); 
 
-		    for (String key : mapItens.keySet()) {
-		    	
-		    	sb.append(mapItens.get(key).stream().map(i -> i.toJSON()).collect(Collectors.joining(",")));
-			
-		     }
-		    sb.append("]"); 
+			for (Item item : itens) {
+				sb.append(item.toJSON()).append(",");
+			}
+ 
+			sb.append("]"); 
+		   
 		    
 			this.logger.log(Level.INFO, String.format("Lista concatenada: %s", sb.toString()));
 
 		    return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductEntity>>() {
 			});
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot product by id: %s", e.getMessage()), e);
+			this.logger.log(Level.SEVERE, String.format("Cannot get products by ids: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

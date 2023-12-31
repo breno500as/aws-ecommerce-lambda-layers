@@ -69,7 +69,7 @@ public class OrderRepository extends BaseLambdaFunction {
 		try {
 
 			final Table table = this.dynamoDB.getTable(this.tableOrder);
-			table.deleteItem("pk", email, "orderId", orderId);
+			table.deleteItem("pk", email, "sk", orderId);
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot delete order: %s", e.getMessage()), e);
@@ -96,6 +96,8 @@ public class OrderRepository extends BaseLambdaFunction {
 			}
 
 			sb.append("]");
+			
+			this.logger.log(Level.INFO, String.format("Orders: %s", sb.toString()));
 
 			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<OrderEntity>>() {
 			});

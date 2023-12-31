@@ -4,14 +4,13 @@ import java.util.List;
 
 import com.br.aws.ecommerce.layers.model.BillingDTO;
 import com.br.aws.ecommerce.layers.model.ShippingDTO;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OrderEntity {
 
-	@JsonProperty("email")
+	// Email
 	private String pk;
 
-	@JsonProperty("orderId")
+	// OrderID
 	private String sk;
 
 	private ShippingDTO shipping;
