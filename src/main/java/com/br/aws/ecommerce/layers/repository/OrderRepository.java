@@ -52,6 +52,8 @@ public class OrderRepository extends BaseLambdaFunction {
 					.withJSON("products", getMapper().writeValueAsString(order.getProducts()));
 				 
 			table.putItem(item);
+			
+			order.setCreatedAt(123);
 
 			return order;  
 			

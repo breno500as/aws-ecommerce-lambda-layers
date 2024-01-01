@@ -21,6 +21,11 @@ public class ProductEntity {
 	public ProductEntity(String id) {
 		this.id = id;
 	}	
+	
+	public ProductEntity(String id, String code) {
+		this.id = id;
+		this.code = code;
+	}	
 
 	public String getId() {
 		return id;
