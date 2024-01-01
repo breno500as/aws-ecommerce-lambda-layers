@@ -28,7 +28,7 @@ public class OrderRepository extends BaseLambdaFunction {
 
 	private String tableOrder = "order";
 	
-	private static final String FIELDS_PROJECTION_WITHOUT_PRODUCTS = "pk, sk, shipping, billing";
+	private static final String FIELDS_PROJECTION_WITHOUT_PRODUCTS = "pk, sk, createdAt, shipping, billing";
 
 	public OrderRepository(AmazonDynamoDB amazonDynamoDB) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
