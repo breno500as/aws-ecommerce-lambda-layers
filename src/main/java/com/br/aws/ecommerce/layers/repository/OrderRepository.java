@@ -42,18 +42,20 @@ public class OrderRepository extends BaseLambdaFunction {
 
 			 
 			final Table table = this.dynamoDB.getTable(this.tableOrder);
+			
+			order.setCreatedAt(Instant.now().toEpochMilli());
 
 
 			final Item item = new Item().withPrimaryKey("pk", order.getPk(), 
 			        "sk", UUID.randomUUID().toString())
-					.withLong("createdAt", Instant.now().toEpochMilli())
+					.withLong("createdAt", order.getCreatedAt())
 					.withJSON("shipping", getMapper().writeValueAsString(order.getShipping()))
 					.withJSON("billing", getMapper().writeValueAsString(order.getBilling()))
 					.withJSON("products", getMapper().writeValueAsString(order.getProducts()));
 				 
 			table.putItem(item);
 			
-			order.setCreatedAt(123);
+		
 
 			return order;  
 			
