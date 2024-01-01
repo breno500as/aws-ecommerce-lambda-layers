@@ -14,6 +14,7 @@ import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
 import com.br.aws.ecommerce.layers.entity.OrderEntity;
@@ -26,16 +27,13 @@ public class OrderRepository extends BaseLambdaFunction {
 	private DynamoDB dynamoDB;
 
 	private String tableOrder = "order";
+	
+	private static final String FIELDS_PROJECTION_WITHOUT_PRODUCTS = "pk, sk, shipping, billing";
 
 	public OrderRepository(AmazonDynamoDB amazonDynamoDB) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
 	}
 
-	
- 
- 
-
- 
 	public OrderEntity save(OrderEntity order) {
 
 		try {
@@ -55,8 +53,6 @@ public class OrderRepository extends BaseLambdaFunction {
 				 
 			table.putItem(item);
 			
-		
-
 			return order;  
 			
 			 
@@ -83,13 +79,27 @@ public class OrderRepository extends BaseLambdaFunction {
 	}
 
 	 
-	public List<OrderEntity> findAll() {
+	public List<OrderEntity> findAll(boolean getProducts) {
 
 		try {
 
 			final Table table = this.dynamoDB.getTable(this.tableOrder);
 
-			final ItemCollection<ScanOutcome> itemCollection = table.scan();
+			ScanSpec scanSpec ;
+
+			if (getProducts) {
+				scanSpec  = new ScanSpec();
+			} else {
+				scanSpec  = new ScanSpec()
+				    // Faz o filtro por outros campos da tabela, sempre utilizar scan para filtrar
+				    // por atributos que não são a PK, para filtrar pela PK utilizar getItem  de Table ou QuerySpec
+					//	.withFilterExpression("#createdAt = :createdAt")
+					//	.withNameMap(new NameMap().with("#createdAt", "createdAt"))
+					//	.withValueMap(new ValueMap().withLong(":createdAt", 1704144250391l))
+						.withProjectionExpression(FIELDS_PROJECTION_WITHOUT_PRODUCTS);
+			}
+
+			final ItemCollection<ScanOutcome> itemCollection = table.scan(scanSpec );
 
 			final StringBuilder sb = new StringBuilder();
 
@@ -122,7 +132,8 @@ public class OrderRepository extends BaseLambdaFunction {
 			
 			 final QuerySpec spec = new QuerySpec() 
 					   .withKeyConditionExpression("pk = :email") 
-					.withValueMap(new ValueMap() 
+					   .withProjectionExpression(FIELDS_PROJECTION_WITHOUT_PRODUCTS)
+					   .withValueMap(new ValueMap() 
 					   .withString(":email", email));
 
 			 final ItemCollection<QueryOutcome> items = table.query(spec);  
