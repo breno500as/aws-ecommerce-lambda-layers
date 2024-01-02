@@ -10,15 +10,19 @@ import java.util.stream.Collectors;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
+import com.br.aws.ecommerce.layers.entity.EventEntity;
 import com.br.aws.ecommerce.layers.entity.ProductEntity;
 import com.br.aws.ecommerce.layers.model.OrderEnvelopeDTO;
 import com.br.aws.ecommerce.layers.model.OrderEventDTO;
 import com.br.aws.ecommerce.layers.model.ProductEventDTO;
 
-public class EventRepository extends BaseLambdaFunction {
+public class EventRepository extends BaseLambdaFunction<EventEntity> {
 
 	private Logger logger = Logger.getLogger(EventRepository.class.getName());
 
@@ -95,6 +99,49 @@ public class EventRepository extends BaseLambdaFunction {
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot save event: %s", e.getMessage()), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	public List<EventEntity> findByEmail(String email) {
+		try {
+
+			final Table table = this.dynamoDB.getTable(this.tableEvent);
+			
+			final Index index = table.getIndex("emailIndex");
+			
+			 final QuerySpec spec = new QuerySpec()
+					   .withKeyConditionExpression("email = :email") 
+					   .withValueMap(new ValueMap() 
+					   .withString(":email", email));
+
+			return super.formatJsonResponse(index.query(spec)); 
+			
+		} catch (Exception e) {
+			this.logger.log(Level.SEVERE, String.format("Cannot get events by email: %s", e.getMessage()), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	public List<EventEntity> findByEmailAndEventType(String email, String eventType) {
+		try {
+
+			final Table table = this.dynamoDB.getTable(this.tableEvent);
+			
+			final Index index = table.getIndex("emailIndex");
+			
+			 final QuerySpec spec = new QuerySpec() 
+					   .withKeyConditionExpression("email = :email AND begins_with(sk, :prefix)") 
+					   .withValueMap(new ValueMap() 
+					   .withString(":email", email)
+					   .withString(":prefix", eventType));
+
+			 return super.formatJsonResponse(index.query(spec)); 
+			 
+		} catch (Exception e) {
+			this.logger.log(Level.SEVERE, String.format("Cannot get events by email: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

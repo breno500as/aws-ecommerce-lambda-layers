@@ -8,8 +8,6 @@ import java.util.logging.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
@@ -20,9 +18,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
 import com.br.aws.ecommerce.layers.entity.ProductEntity;
-import com.fasterxml.jackson.core.type.TypeReference;
 
-public class ProductRepository extends BaseLambdaFunction {
+public class ProductRepository extends BaseLambdaFunction<ProductEntity> {
 
 	private Logger logger = Logger.getLogger(ProductRepository.class.getName());
 
@@ -105,27 +102,13 @@ public class ProductRepository extends BaseLambdaFunction {
 
 	}
 
-	 
 	public List<ProductEntity> findAll() {
 
 		try {
 
 			final Table table = this.dynamoDB.getTable(this.tableProducts);
 
-			final ItemCollection<ScanOutcome> itemCollection = table.scan();
-
-			final StringBuilder sb = new StringBuilder();
-
-			sb.append("[");
-
-			for (Item item : itemCollection) {
-				sb.append(item.toJSON()).append(",");
-			}
-
-			sb.append("]");
-
-			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductEntity>>() {
-			});
+			return super.formatJsonResponse(table.scan());
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot find all products: %s", e.getMessage()), e);
@@ -155,8 +138,7 @@ public class ProductRepository extends BaseLambdaFunction {
 	}
 	
 	
-	 
- 
+	
 	public List<ProductEntity> getByIds(List<String> ids) {
 
 		try {
@@ -168,23 +150,8 @@ public class ProductRepository extends BaseLambdaFunction {
 			
 			final BatchGetItemSpec spec = new BatchGetItemSpec() .withTableKeyAndAttributes(tableKeysAndAttributes);
 			
-			final List<Item> itens = this.dynamoDB.batchGetItem(spec).getTableItems().get(this.tableProducts);
-			
-			final StringBuilder sb = new StringBuilder();
-
-			sb.append("["); 
-
-			for (Item item : itens) {
-				sb.append(item.toJSON()).append(",");
-			}
- 
-			sb.append("]"); 
-		   
-		    
-			this.logger.log(Level.INFO, String.format("Lista concatenada: %s", sb.toString()));
-
-		    return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<ProductEntity>>() {
-			});
+	 
+		    return super.formatJsonResponse(this.dynamoDB.batchGetItem(spec).getTableItems().get(this.tableProducts));
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot get products by ids: %s", e.getMessage()), e);
 			throw new RuntimeException(e);

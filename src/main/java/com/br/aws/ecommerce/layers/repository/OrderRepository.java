@@ -9,18 +9,14 @@ import java.util.logging.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
-import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
 import com.br.aws.ecommerce.layers.entity.OrderEntity;
-import com.fasterxml.jackson.core.type.TypeReference;
 
-public class OrderRepository extends BaseLambdaFunction {
+public class OrderRepository extends BaseLambdaFunction<OrderEntity> {
 
 	private Logger logger = Logger.getLogger(OrderRepository.class.getName());
 
@@ -99,22 +95,9 @@ public class OrderRepository extends BaseLambdaFunction {
 						.withProjectionExpression(FIELDS_PROJECTION_WITHOUT_PRODUCTS);
 			}
 
-			final ItemCollection<ScanOutcome> itemCollection = table.scan(scanSpec );
+		 
 
-			final StringBuilder sb = new StringBuilder();
-
-			sb.append("[");
-
-			for (Item item : itemCollection) {
-				sb.append(item.toJSON()).append(",");
-			}
-
-			sb.append("]");
-			
-			this.logger.log(Level.INFO, String.format("Orders: %s", sb.toString()));
-
-			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<OrderEntity>>() {
-			});
+            return super.formatJsonResponse(table.scan(scanSpec));
 
 		} catch (Exception e) {
 			this.logger.log(Level.SEVERE, String.format("Cannot find all orders: %s", e.getMessage()), e);
@@ -136,26 +119,9 @@ public class OrderRepository extends BaseLambdaFunction {
 					   .withValueMap(new ValueMap() 
 					   .withString(":email", email));
 
-			 final ItemCollection<QueryOutcome> items = table.query(spec);  
-
-			if (items == null) {
-				throw new RuntimeException("Order not found!");
-			}
-			
-			final StringBuilder sb = new StringBuilder();
-
-			sb.append("[");
-			
-			for (Item item : items) {
-				sb.append(item.toJSON()).append(",");
-			}
-			
-			sb.append("]");
-
-			return super.getMapper().readValue(sb.toString().replace(",]", "]"), new TypeReference<List<OrderEntity>>() {
-			});
+		    return super.formatJsonResponse(table.query(spec));
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot order by id: %s", e.getMessage()), e);
+			this.logger.log(Level.SEVERE, String.format("Cannot order by email: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}
