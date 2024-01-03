@@ -22,12 +22,13 @@ public class OrderRepository extends BaseLambdaFunction<OrderEntity> {
 
 	private DynamoDB dynamoDB;
 
-	private String tableOrder = "order";
+	private String tableOrder;
 	
 	private static final String FIELDS_PROJECTION_WITHOUT_PRODUCTS = "pk, sk, createdAt, shipping, billing";
 
-	public OrderRepository(AmazonDynamoDB amazonDynamoDB) {
+	public OrderRepository(AmazonDynamoDB amazonDynamoDB, String tableName) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
+		this.tableOrder = tableName;
 	}
 
 	public OrderEntity save(OrderEntity order) {

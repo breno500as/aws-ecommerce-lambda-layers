@@ -28,10 +28,11 @@ public class EventRepository extends BaseLambdaFunction<EventEntity> {
 
 	private DynamoDB dynamoDB;
 
-	private String tableEvent = "event";
+	private String tableEvent;
 
-	public EventRepository(AmazonDynamoDB amazonDynamoDB) {
+	public EventRepository(AmazonDynamoDB amazonDynamoDB, String tableName) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
+		this.tableEvent = tableName;
 	}
 	
 	

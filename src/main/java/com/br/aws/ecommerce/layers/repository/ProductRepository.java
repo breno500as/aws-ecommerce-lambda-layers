@@ -25,10 +25,11 @@ public class ProductRepository extends BaseLambdaFunction<ProductEntity> {
 
 	private DynamoDB dynamoDB;
 
-	private String tableProducts = "product";
+	private String tableProducts;
 
-	public ProductRepository(AmazonDynamoDB amazonDynamoDB) {
+	public ProductRepository(AmazonDynamoDB amazonDynamoDB, String tableName) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
+		this.tableProducts = tableName;
 	}
 
 	
