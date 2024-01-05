@@ -75,8 +75,7 @@ public class InvoiceTranscationRepository  extends BaseLambdaFunction<InvoiceTra
 
 			return super.getMapper().readValue(item.toJSON(), InvoiceTransactionEntity.class);
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot invoice by key: %s", e.getMessage()), e);
-			throw new RuntimeException(e);
+			return null;
 		}
 	}
 	
@@ -96,7 +95,7 @@ public class InvoiceTranscationRepository  extends BaseLambdaFunction<InvoiceTra
 
 			return super.getMapper().readValue(updateItemOutcome.getItem().toJSON(), InvoiceTransactionEntity.class);
 		} catch (Exception e) {
-			this.logger.log(Level.SEVERE, String.format("Cannot update product: %s", e.getMessage()), e);
+			this.logger.log(Level.SEVERE, String.format("Cannot update invoice: %s", e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

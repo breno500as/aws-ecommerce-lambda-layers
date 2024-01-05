@@ -1,6 +1,6 @@
-package com.br.aws.ecommerce.layers.entity;
+package com.br.aws.ecommerce.layers.model;
 
-public class InvoiceFileEntity {
+public class InvoiceObjectDTO {
 
 	private String custumerName;
 
@@ -8,7 +8,7 @@ public class InvoiceFileEntity {
 
 	private long totalValue;
 
-	private long quantity;
+	private int quantity;
 
 	private String productId;
 
@@ -36,11 +36,11 @@ public class InvoiceFileEntity {
 		this.totalValue = totalValue;
 	}
 
-	public long getQuantity() {
+	public int getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(long quantity) {
+	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
 
@@ -50,6 +50,12 @@ public class InvoiceFileEntity {
 
 	public void setProductId(String productId) {
 		this.productId = productId;
+	}
+
+	@Override
+	public String toString() {
+		return "InvoiceFileEntity [custumerName=" + custumerName + ", invoiceNumber=" + invoiceNumber + ", totalValue="
+				+ totalValue + ", quantity=" + quantity + ", productId=" + productId + "]";
 	}
 
 }

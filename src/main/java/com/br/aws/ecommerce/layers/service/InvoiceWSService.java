@@ -11,6 +11,7 @@ import com.amazonaws.services.apigatewaymanagementapi.model.GetConnectionRequest
 import com.amazonaws.services.apigatewaymanagementapi.model.GetConnectionResult;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionResult;
+import com.br.aws.ecommerce.layers.model.InvoiceTranscationStatus;
 
 public class InvoiceWSService {
 	
@@ -22,9 +23,9 @@ public class InvoiceWSService {
 		this.client = client;
 	}
 	
-	public boolean sendInvoiceStatus(String connectionId, String transactionId, String status) {
-		final String data =  "{\"trascationId\": \"" + transactionId + "\""  
-		+ ",\"status\": \"" + status + "\"}";
+	public boolean sendInvoiceStatus(String connectionId, String transactionId, InvoiceTranscationStatus status) {
+		final String data =  "{\"transactionId\": \"" + transactionId + "\""  
+		+ ",\"status\": \"" + status.getValue() + "\"}";
 		return this.sendData(connectionId, data);
 	}
 	

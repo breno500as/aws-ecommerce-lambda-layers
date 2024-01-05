@@ -18,6 +18,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.br.aws.ecommerce.layers.base.BaseLambdaFunction;
 import com.br.aws.ecommerce.layers.entity.EventEntity;
 import com.br.aws.ecommerce.layers.entity.ProductEntity;
+import com.br.aws.ecommerce.layers.model.InvoiceEventDTO;
 import com.br.aws.ecommerce.layers.model.OrderEnvelopeDTO;
 import com.br.aws.ecommerce.layers.model.OrderEventDTO;
 import com.br.aws.ecommerce.layers.model.ProductEventDTO;
@@ -33,6 +34,36 @@ public class EventRepository extends BaseLambdaFunction<EventEntity> {
 	public EventRepository(AmazonDynamoDB amazonDynamoDB, String tableName) {
 		this.dynamoDB = new DynamoDB(amazonDynamoDB);
 		this.tableEvent = tableName;
+	}
+	
+	
+	public void saveInvoiceEvent(InvoiceEventDTO invoiceEvent) {
+
+		try {
+
+			final Table table = this.dynamoDB.getTable(this.tableEvent);
+			
+			final long timestamp = Instant.now().toEpochMilli();
+			final long ttl = Instant.now().plus(Duration.ofMinutes(10)).getEpochSecond();	 
+
+			final Item item = new Item()
+					.withPrimaryKey("pk", "#invoice_" + invoiceEvent.getPk(), 
+							        "sk",  invoiceEvent.getStatus() + "#" + timestamp)
+					.withLong("createdAt", timestamp)
+					.withString("email", invoiceEvent.getEmail())
+					.withString("eventType", invoiceEvent.getStatus())
+					.withJSON("info", getMapper().writeValueAsString("{\"transaction\": \"" + invoiceEvent.getTransactionId() +"\""+
+							",\"productId\": \""+invoiceEvent.getProductId()+"\"}"))
+					.withLong("ttl", ttl);
+		 
+
+			table.putItem(item);
+
+
+		} catch (Exception e) {
+			this.logger.log(Level.SEVERE, String.format("Cannot save event: %s", e.getMessage()), e);
+			throw new RuntimeException(e);
+		}
 	}
 	
 	

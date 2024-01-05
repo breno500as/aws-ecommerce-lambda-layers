@@ -1,5 +1,9 @@
 package com.br.aws.ecommerce.layers.model;
 
+import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum InvoiceTranscationStatus {
 	
 	GENERATED("URL_GENERATED"),
@@ -17,6 +21,11 @@ public enum InvoiceTranscationStatus {
 
 	public String getValue() {
 		return value;
+	}
+	
+	@JsonCreator
+	public static InvoiceTranscationStatus forValue(String value) {
+		return Arrays.asList(InvoiceTranscationStatus.values()).stream().filter(v -> v.getValue().equals(value)).findFirst().get();
 	}
 
 }
